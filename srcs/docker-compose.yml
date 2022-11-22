@@ -69,10 +69,10 @@ services:
       - ./secrets/ft.env
       # - ./secrets/redis.env
       - ./secrets/client.env
-    ports:
-      - "3000:3000"
-    # expose:
-    #   - 3000
+    # ports:
+    #   - "3000:3000"
+    expose:
+      - 3000
     restart: always
     # volumes: # only dev
     #   - ./requirements/backend/auth:/auth_code
