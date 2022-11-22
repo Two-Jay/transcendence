@@ -1,0 +1,76 @@
+.DS_Store
+
+# compiled output
+/srcs/**/**/**/dist
+/srcs/**/**/**/node_modules
+/srcs/**/**/dist
+/srcs/**/**/node_modules
+
+# Logs
+srcs/**/**/**/logs
+*.log
+/srcs/**/**/**/npm-debug.log*
+/srcs/**/**/**/pnpm-debug.log*
+/srcs/**/**/**/yarn-debug.log*
+/srcs/**/**/**/yarn-error.log*
+/srcs/**/**/**/lerna-debug.log*
+
+# OS
+/srcs/**/**/**/.DS_Store
+
+# Tests
+/srcs/**/**/**/coverage
+/srcs/**/**/**/.nyc_output
+
+# IDEs and editors
+/srcs/**/**/**/.idea
+/srcs/**/**/**/.project
+/srcs/**/**/**/.classpath
+/srcs/**/**/**/.c9/
+/srcs/**/**/**/*.launch
+/srcs/**/**/**/.settings/
+/srcs/**/**/**/*.sublime-workspace
+
+# IDE - VSCode
+/srcs/**/**/**/.vscode/*
+/srcs/**/**/**/!.vscode/settings.json
+/srcs/**/**/**/!.vscode/tasks.json
+/srcs/**/**/**/!.vscode/launch.json
+/srcs/**/**/**/!.vscode/extensions.json
+
+
+# dependenc
+/srcs/**/**/node_modules
+/srcs/**/**/.pnp
+/srcs/**/**/.pnp.js
+
+# testing
+/srcs/**/**/coverage
+
+# next.js
+/srcs/**/**/.next/
+/srcs/**/**/out/
+
+# production
+/srcs/**/**/build
+
+# misc
+/srcs/**/**/.DS_Store
+/srcs/**/**/*.pem
+
+# debug
+/srcs/**/**/npm-debug.log*
+/srcs/**/**/yarn-debug.log*
+/srcs/**/**/yarn-error.log*
+/srcs/**/**/.pnpm-debug.log*
+
+# local env files
+/srcs/**/**/.env*.local
+
+# vercel
+/srcs/**/**/.vercel
+
+# typescript
+/srcs/**/**/*.tsbuildinfo
+
+

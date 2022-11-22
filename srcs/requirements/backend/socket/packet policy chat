@@ -1,0 +1,132 @@
+export class OptionDataDto {
+  @IsOptional()
+  @IsString()
+  @Length(1, 20)
+  public readonly title: string;
+
+  @IsOptional()
+  @IsString()
+  @Max(8)
+  public readonly password: string;
+}
+
+export class MessageDataDto {
+  @IsDate()
+  @IsNotEmpty()
+  public readonly timeStamp: Date;
+
+  @IsString()
+  public author: string;
+
+  @IsString()
+  public scope: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public readonly content: string;
+
+  @IsOptional()
+  @IsObject()
+  public option: any;
+}
+
+
+
+모든 항목에 timeStamp는 필수!
+- timeStamp: (string)
+
+EMIT 종류
+- broadcast (접속한 모든 소켓에 보냄)
+- login (동일한 login의 모든 소켓에 보냄)
+- socket (한 소켓에만 보냄)
+- room (채팅방에 포함된 소켓에 보냄)
+
+
+
+
+
+Command: [welcome_kit]
+- null
+EMIT: socket('_welcome_kit', +{ option: [ [...friendList], [...blockList], [...chatRooms], [...gameRooms] ] });
+
+Command: [create_room]
+//'private': 비공개방 (목록에 노출 안되고, 초대받아야만 입장 가능), 'public': 공개방, 'protected': 비밀번호방
+- content: room_type? (string) [private, public, protected]
+- option:
+  - title: 1~20자리 (string)
+  - password: 2~8자리 (string)
+//content가 private인 경우에는 보내지 않음
+EMIT: broadcast('_create_room', +{scope: #roomId});
+//방 생성결과 반환
+EMIT: socket('_create_room', +{scope: #roomId});
+
+Command: [join_room]
+- scope: #roomId (string)
+//'private': 비공개방 (목록에 노출 안되고, 초대받아야만 입장 가능), 'public': 공개방, 'protected': 비밀번호방
+- content: room_type (string) [private, public, protected]
+- option:
+  - title: 1~20자리 (string)
+  - password?: 2~8자리 (string)
+//ban당한 경우
+EMIT: socket('_join_room', +{ author: login, option: 'banned' });
+//비번 오류
+EMIT: socket('_join_room', +{ author: login, option: 'wrong password' });
+//중복입장 아닐때
+EMIT: room('_join_room', +{ author: login, option: 'member array' });
+//중복입장일때
+EMIT: socket('_join_room', +{ author: login, option: 'member array' });
+
+Command: [leave_room]
+- null
+EMIT: socket('_leave_room', +{ author: %SYSTEM%, scope: #roomId, content: login });
+EMIT: room('_leave_room', +{ author: %SYSTEM%, scope: #roomId, content: login });
+
+Commnad: [delete_room] : <backend only>
+- not useable
+EMIT: broadcast('_delete_room', +{ author: %SYSTEM%, scope: #roomId });
+
+Category: admin
+Command: [invite_room]
+- content: %target_login (string)
+EMIT: login('_invite_room', +{ author: login, scope: #roomId }); // to target
+EMIT: room('_invite_room', +{ author: login, scope: #roomId });
+
+Command: [password]
+- option:
+  - password: 2~8자리 (string)
+// 전체에 방 속성 변화 알림 (변하지 않아도 일단 날림)
+EMIT: broadcast('_password', +{ scope: #roomId, content: public/protected });
+// 방에 비번 변경 정보 알림
+EMIT: room('_password', +{ author: login });
+
+Command: [mute]
+- scope: %target_login (string)
+- content: duration (number) (seconds)
+EMIT: room('_mute', +{ author: login, option: finishTime });
+
+Command: [be_admin]
+- content: %target_login (string)
+EMIT: room('_be_admin', +{ author: login });
+
+Command: [kick]
+- content: %target_login (string)
+EMIT: login('_kick', +{ author: login });
+EMIT: room('_kick', +{ author: login });
+
+Command: [ban]
+- content: %target_login (string)
+EMIT: login('_ban', +{ author: login });
+EMIT: room('_ban', +{ author: login });
+
+Catetgory: message
+Command: [private]
+- scope: %target_login (string)
+- content: message (string)
+EMIT: login('_private', +{ author: login });
+
+Command: [room]
+- content: message (string)
+EMIT: room('_room', +{ author: login });
+
+
+

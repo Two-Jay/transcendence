@@ -1,0 +1,115 @@
+version: "3"
+
+networks:
+  transcendence:
+
+services:
+
+  postgres:
+    tty: true
+    container_name: postgres
+    build: requirements/postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./requirements/postgres/setup:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - transcendence
+
+  socket:
+    tty: true
+    container_name: socket
+    build: requirements/backend/socket
+    image: socket
+    env_file:
+      # - ./secrets/redis.env
+      - ./secrets/jwt.env
+    ports:
+      - "3001:3001"
+    restart: always
+    # volumes: # only dev
+    #   - ./requirements/backend/socket:/socket_code
+    depends_on:
+      - postgres
+    networks:
+      - transcendence
+
+  files:
+    tty: true
+    container_name: files
+    build: requirements/backend/files
+    image: files
+    env_file:
+      - ./secrets/jwt.env
+    ports:
+      - "3003:3003"
+    restart: always
+    # volumes: # only dev
+    #   - ./requirements/backend/files:/files_code
+    depends_on:
+      - postgres
+    networks:
+      - transcendence
+
+  auth:
+    tty: true
+    container_name: auth
+    build: requirements/backend/auth
+    image: auth
+    env_file:
+      - ./secrets/auth.env
+      - ./secrets/jwt.env
+      - ./secrets/email.env
+      - ./secrets/ft.env
+      # - ./secrets/redis.env
+      - ./secrets/client.env
+    ports:
+      - "3000:3000"
+    # expose:
+    #   - 3000
+    restart: always
+    # volumes: # only dev
+    #   - ./requirements/backend/auth:/auth_code
+    depends_on:
+      - socket
+      - files
+    networks:
+      - transcendence
+
+  front:
+    tty: true
+    container_name: front
+    build: requirements/frontend
+    image: front
+    env_file:
+      - ./secrets/front.env
+    ports:
+      - "3002:3002"
+    restart: always
+    # volumes: # only dev
+    #   - ./requirements/frontend:/front_code
+    depends_on:
+      - auth
+    networks:
+      - transcendence
+
+  proxy:
+    tty : true
+    container_name: proxy
+    build: requirements/proxy
+    image: proxy
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - front
+    networks:
+      - transcendence
+    volumes:
+      - "~/volumes/nginx/logs:/home/myname/logs"

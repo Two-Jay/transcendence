@@ -1,0 +1,290 @@
+export class GameRoomDto {
+    @IsDate()
+    @IsNotEmpty()
+    public readonly createAt: Date = new Date();
+
+    /**
+      * params: login: <string>
+      */
+    @IsString()
+    public readonly invite?: string; // login
+
+    /**
+      * params: roomId: <number>
+      */
+    @IsNumber()
+    public readonly roomId: number;
+  
+    /**
+      * params: title: <string>
+      */
+    @IsString()
+    @IsNotEmpty()
+    public title: string;
+  
+    /**
+      * params: socketId: <string[2]>
+      */
+    @IsString()
+    @IsNotEmpty()
+    public playerSocketId: string[];
+  
+    /**
+      * params: login: <string[2]>
+      */
+    @IsString()
+    @IsNotEmpty()
+    public player: string[];
+
+    /**
+      * params: socket.id: <string>, socket.id: <string>
+      */
+    @IsNotEmpty()
+    public observer: Map<string, string>; // socket.id, Socket.id
+
+    /**
+      * params: login: <string>, login: <string>
+      */
+    @IsNotEmpty()
+    public banUser: Map<string, string>; // login, login
+
+    /**
+      * params: gamePlayDto: <GamePlayDto>
+      */
+    @IsObject()
+    @IsNotEmpty()
+    public status: GamePlayDto;
+}
+
+
+
+export class GamePlayDto {
+    @IsDate()
+    @IsNotEmpty()
+    public timeStamp: Date = new Date();
+
+    /**
+      * params: login: <string>
+      */
+    @IsString()
+    public author: string;
+
+    /**
+      * params: roomId: <number>
+      */
+    @IsNumber()
+    public readonly roomId: number;
+
+    /**
+      * params: ballPosition: <number[2]> scale x1000
+      */
+    @IsNumber()
+    @IsNotEmpty()
+    @Min(0)
+    @Max(2 * 1000)
+    public readonly ballPosition: number[]; // [x, y] * 1000 // normalized
+
+    /**
+      * params: paddlePosition: <number[2]> [player1, player2] scale x1000
+      */
+    @IsNumber()
+    @IsNotEmpty()
+    @Min(0)
+    @Max(1 * 1000)
+    public readonly paddlePosition: number[]; // [x | y] * 1000 // normalized player1, player2
+
+    /**
+      * params: score: <number[2]>
+      */
+    @IsNumber()
+    @IsNotEmpty()
+    public score: number[];
+ 
+    /**
+      * params: speed: <number>
+      */
+    @IsNumber()
+    @IsNotEmpty()
+    @Min(1)
+    @Max(1000)
+    public readonly speed: number; // 1 ~ 1000 or fixed number?
+
+    /**
+      * params: angle: <number> radian value
+      */
+    @IsNumber()
+    @IsNotEmpty()
+    @Min(0)
+    @Max(Math.PI * 2 * 1000)
+    public readonly angle: number; // 0 ~ Math.PI * 1000 // exclude 0, Math.PI * 1000
+}
+
+
+
+모든 항목에 timeStamp는 필수!
+- timeStamp: (string)
+
+EMIT 종류
+- broadcast (접속한 모든 소켓에 보냄)
+- login (동일한 login의 모든 소켓에 보냄)
+- socket (한 소켓에만 보냄)
+- room (채팅방에 포함된 소켓에 보냄)
+
+
+
+
+Command: [duel]
+- scope: #login (string)
+// 상대가 duel신청을 받을수 없는상황일때
+EMIT: socket('_duel', +{ author: login, option: false }); // 나에게
+// 상태가 duel신청을 받을수 있는상황일때
+EMIT: login('_duel', +{ author: login }); // 적에게
+EMIT: socket('_duel', +{ author: login, option: true }); // 나에게
+
+Command: [cancel_duel]
+- null
+EMIT: login('_cancel_duel', null); // 결투 취소 알림
+EMIT: login('_cancel_duel', null); // 결투 취소 알림
+
+Command: [reject_duel]
+- null
+EMIT: login('_reject_duel', null); // 거절 결과 알림
+EMIT: login('_reject_duel', null); // 거절 결과 알림
+
+Command: [accept_duel]
+- null
+EMIT: login('_accept_duel', +gameRoomDto); // 수락 결과 알림
+EMIT: login('_accept_duel', +gameRoomDto); // 수락 결과 알림
+
+Command: [request_match] 
+- null
+EMIT: socket('_request_match', null);
+//성사되면
+EMIT: login('_request_match', +{ roomId: roomId } as GameRoomDto);
+
+Command: [cancel_request_match]
+- null
+EMIT: socket('_cancel_request_match', null);
+
+Command: [join_game] (GamePlayDto)
+- roomId: number
+EMIT: socket('_join_room', +gameRoomDto);
+
+Command: [observe_game] (GamePlayDto)
+- roomId: number
+EMIT: socket('_observe_game', +gameRoomDto);
+
+Command: [leave_game] (GamePlayDto)
+- null
+EMIT: room('_leave_game', +{ author: '%SYSTEM%', scope: #roomid, content: login});
+
+Command: [move_paddle] (GamePlayDto)
+- position: number
+EMIT: room('_leave_game', roomId, GAME_PLAY_DATA);
+
+
+
+Command: [test_game_room] (GamePlayDto)
+- null
+EMIT: room('_test_game_room', roomId, GAME_ROOM_DATA);
+
+
+
+
+
+; Command: [giveup]
+; - roomId: #roomId (string)
+; EMIT: room(LOGIN, roomId, MESSAGE); // announce to room who was giveup
+
+
+
+
+
+
+
+
+
+
+
+; Category: pong_game
+; PacketType: <GameRoomDto>
+
+; Command: [regist_match_pool]
+; - null
+; EMIT: private(SYSTEM, roomId, MESSAGE); // reply to registed user
+
+; Command: [unregist_match_pool]
+; - null
+; EMIT: private(SYSTEM, roomId, MESSAGE); // reply to registed user
+
+; Command: [join_game_room]
+; - roomId: #roomId (string)
+; EMIT: room(LOGIN, roomId, MESSAGE); // announce to room who was leaved
+
+; Command: [leave_game_room]
+; - roomId: #roomId (string)
+; EMIT: room(LOGIN, roomId, MESSAGE); // announce to room who was leaved
+
+; Command: [giveup]
+; - roomId: #roomId (string)
+; EMIT: room(LOGIN, roomId, MESSAGE); // announce to room who was giveup
+
+; Command: [request_duel] // wait 10 sec
+; - invite: %opponent_login (string)
+; EMIT: private(login, opponent_login, MESSAGE); // accept? // ask to invited user
+
+; Command: [cancel_request_duel] // wait 10 sec
+; - null
+; EMIT: private(login, opponent_login, MESSAGE); // accept? // ask to invited user
+
+; Command: [accept_duel]
+; - null
+; EMIT: private(SYSTEM, ENTIRE_ONLINES, MESSAGE); // broadcast created room info
+; EMIT: private(SYSTEM, player1, MESSAGE); // invite player1
+; EMIT: private(SYSTEM, player2, MESSAGE); // invite player2
+
+; Commnad: [reject_duel]
+; - null
+; EMIT: private(SYSTEM, player1, MESSAGE); // announce to suggested user
+
+; Command: [match_game: only backend] // announce game result
+; - null
+; EMIT: private(SYSTEM, ENTIRE_ONLINES, MESSAGE); // broadcast created room info
+; EMIT: private(SYSTEM, player1, MESSAGE); // invite player1
+; EMIT: private(SYSTEM, player2, MESSAGE); // invite player2
+
+; Command: [game_result: only backend] // announce game result
+; - null
+; EMIT: private(SYSTEM, roomId, MESSAGE) // announce game result
+; // update db...
+
+
+; 모든 항목에 timeStamp는 필수!
+; - timeStamp: (string)
+; - canvas normalize = 2:1
+
+; PacketType: <GamePlayDto>
+; Command: [move]
+; - roomId: #roomId (string)
+; - ballPosition: number[] // x, y (각각 정밀도 1000)
+; - paddlePosition: number[] // x 또는 y (정밀도 1000)
+; - speed: number // fixed value가 될것 같기도함...
+; - angle: number // radian (정밀도 1000)
+; EMIT: room(SYSTEM, roomId, MESSAGE);
+
+; Command: [hit]
+; - roomId: #roomId (string)
+; - ballPosition: number[] // x, y (각각 정밀도 1000)
+; - paddlePosition: number[] // x 또는 y (정밀도 1000)
+; - speed: number // fixed value가 될것 같기도함...
+; - angle: number // radian (정밀도 1000)
+; EMIT: room(SYSTEM, roomId, MESSAGE);
+
+; Command: [begin: only backend]
+; - null
+; EMIT: private(SYSTEM, roomId, MESSAGE) // announce begin ball
+; - MESSAGE:
+;     - timeStamp: string // 공이 움직이기 시작해야 하는 시간 (전송 당시의 시간이 아니라, 약 3초후의 시간이 될것으로 예상함)
+;     - ballPosition: number[] // x, y (각각 정밀도 1000)
+;     - speed: number // fixed value가 될것 같기도함...
+;     - angle: number // radian (정밀도 1000)
