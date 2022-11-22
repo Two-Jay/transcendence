@@ -3,7 +3,8 @@ export default () => {
     ft: {
       client_id: process.env.FT_CLIENT_ID,
       client_secret: process.env.FT_CLIENT_SECRET,
-      callback: 'http://' + process.env.BACKEND_HOST_IP + ':' + process.env.BACKEND_PORT  + '/auth/login/callback',
+      // callback: 'http://' + process.env.BACKEND_HOST_IP + ':' + process.env.BACKEND_PORT,
+      callback: 'http://10.14.10.4:8080',
       email_tail: process.env.FT_EMAIL_TAIL,
       nickname_prefix: process.env.FT_NICKNAME_PREFIX,
       host_ip: process.env.BACKEND_HOST_IP,

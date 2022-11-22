@@ -22,7 +22,7 @@ export class FtStrategy extends PassportStrategy(Strategy, 'ft') {
         'ft.client_id',
       )}&redirect_uri=${configService.get<string>(
         'ft.callback',
-      )}&response_type=code`,
+      )}/auth/login/callback&response_type=code`,
       tokenURL: 'https://api.intra.42.fr/oauth/token',
       clientID: configService.get<string>('ft.client_id'),
       clientSecret: configService.get<string>('ft.client_secret'),
