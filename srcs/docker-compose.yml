@@ -10,10 +10,10 @@ services:
     container_name: postgres
     build: requirements/postgres
     image: postgres
-    ports:
-      - "5432:5432"
-    # expose:
-    #   - 5432
+    # ports:
+    #   - "5432:5432"
+    expose:
+      - 5432
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -32,10 +32,10 @@ services:
     env_file:
       # - ./secrets/redis.env
       - ./secrets/jwt.env
-    ports:
-      - "3001:3001"
-    # expose:
-    #   - 3001
+    # ports:
+    #   - "3001:3001"
+    expose:
+      - 3001
     restart: always
     # volumes: # only dev
     #   - ./requirements/backend/socket:/socket_code
