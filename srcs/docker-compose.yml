@@ -51,10 +51,10 @@ services:
     image: files
     env_file:
       - ./secrets/jwt.env
-    ports:
-      - "3003:3003"
-    # expose:
-    #   - 3003
+    # ports:
+    #   - "3003:3003"
+    expose:
+      - 3003
     restart: always
     # volumes: # only dev
     #   - ./requirements/backend/files:/files_code
