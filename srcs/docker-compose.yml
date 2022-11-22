@@ -95,10 +95,10 @@ services:
     image: front
     env_file:
       - ./secrets/front.env
-    ports:
-      - "3002:3002"
-    # expose:
-    #   - 3002
+    # ports:
+    #   - "3002:3002"
+    expose:
+      - 3002
     restart: always
     # volumes: # only dev
     #   - ./requirements/frontend:/front_code
