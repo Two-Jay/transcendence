@@ -12,6 +12,8 @@ services:
     image: postgres
     ports:
       - "5432:5432"
+    # expose:
+    #   - 5432
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -32,6 +34,8 @@ services:
       - ./secrets/jwt.env
     ports:
       - "3001:3001"
+    # expose:
+    #   - 3001
     restart: always
     # volumes: # only dev
     #   - ./requirements/backend/socket:/socket_code
@@ -49,6 +53,8 @@ services:
       - ./secrets/jwt.env
     ports:
       - "3003:3003"
+    # expose:
+    #   - 3003
     restart: always
     # volumes: # only dev
     #   - ./requirements/backend/files:/files_code
@@ -91,6 +97,8 @@ services:
       - ./secrets/front.env
     ports:
       - "3002:3002"
+    # expose:
+    #   - 3002
     restart: always
     # volumes: # only dev
     #   - ./requirements/frontend:/front_code
