@@ -515,9 +515,6 @@ make .
 make down
 make fclean
 
-깃허브 토큰(seongcho1)
-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
-
 ENOSPC 발생시 해결법
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
 
